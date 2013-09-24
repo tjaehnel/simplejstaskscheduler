@@ -7,7 +7,7 @@ function SimpleTaskManager() {
 	this.taskQueue = [];
 	this.prevTaskHandle = 0;
 	this.taskRunning = false;
-	this.runningTaskHandle = 0;
+	this.runningTaskHandle = null;
 }
 
 /**
@@ -34,8 +34,9 @@ SimpleTaskManager.prototype.enqueueAsyncTask = function(taskFunction) {
 	task.sync = false;
 	task.taskFunction = taskFunction;
 	this.taskQueue.push(task);
+	this.schedulerMain();
 	return task.handle;
-}
+};
 
 /**
  * Function: asyncTaskFinished
@@ -46,28 +47,35 @@ SimpleTaskManager.prototype.enqueueAsyncTask = function(taskFunction) {
  * taskHandle - Handle of the finishing task
  */
 SimpleTaskManager.prototype.asyncTaskFinished = function(taskHandle) {
-	
-}
+	if(taskHandle != this.runningTaskHandle) {
+		throw new Error("Finishing task handle unknown.");
+	}
+	this.taskRunning = false;
+	this.runningTaskHandle = null;
+	this.schedulerMain();
+};
+
 
 SimpleTaskManager.prototype.taskPush = function(task) {
 	this.taskQueue.push(task);
-}
+};
 
 SimpleTaskManager.prototype.taskPop = function() {
 	return this.taskQueue.shift();
-}
+};
 
 SimpleTaskManager.prototype.generateTaskHandle = function() {
 	this.prevTaskHandle++;
 	return this.prevTaskHandle;
-}
+};
+
 
 SimpleTaskManager.prototype.schedulerMain = function() {
-	if (this.taskRunning == false) {
+	if (this.taskRunning == true) {
 		return;
 	}
 	this.runNextTask();
-}
+};
 
 SimpleTaskManager.prototype.runNextTask = function() {
 	if (this.taskQueue.length < 1) {
@@ -76,8 +84,8 @@ SimpleTaskManager.prototype.runNextTask = function() {
 	this.taskRunning = true;
 	var crntTask = this.taskPop();
 	this.runningTaskHandle = crntTask.handle;
-	crntTask.taskFunction();
-}
+	crntTask.taskFunction(crntTask.handle);
+};
 
 function SimpleTaskManagerTask() {
 	this.handle = null; // task handle
