@@ -29,7 +29,7 @@ describe("Queue Management", function() {
     };
     var taskHandle1 = tm.enqueueAsyncTask(taskFct1);
     expect(tm.taskRunning).toBeTruthy();
-    expect(tm.runningTaskHandle).toEqual(taskHandle1);
+    expect(tm.runningTask.handle).toEqual(taskHandle1);
     waitsFor(function() {
       if(tm.taskRunning) {
         return false;
@@ -66,7 +66,7 @@ describe("Queue Management", function() {
     	  return true;
       }
       return false;
-    }, "one or both of tasks did not run", 2000);
+    }, "both tasks to be run", 2000);
     runs(function() {
     	expect(taskOrder).toBe(2);
     	expect(tm.taskRunning).toBeFalsy();

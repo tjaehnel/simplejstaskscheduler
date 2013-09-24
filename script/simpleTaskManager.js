@@ -7,7 +7,7 @@ function SimpleTaskManager() {
 	this.taskQueue = [];
 	this.prevTaskHandle = 0;
 	this.taskRunning = false;
-	this.runningTaskHandle = null;
+	this.runningTask = null;
 }
 
 /**
@@ -24,17 +24,30 @@ function SimpleTaskManager() {
  *                The task handle is adopted as the only
  *                parameter on execution
  *                Prototype: function taskFunction(taskHandle);
+ * startCbk     - (optional) Callback function to be executed, before
+ *                taskFunction is being started.
+ *                Adopts task handle as first parameter
+ * finishCbk    - (optional) Callback function to be executed, after
+ *                task finished executing (i.e. asyncTaskFinished called)
+ *                Adopts task handle as first parameter
  *                
  * Return:
  * task handle
  */
-SimpleTaskManager.prototype.enqueueAsyncTask = function(taskFunction) {
+SimpleTaskManager.prototype.enqueueAsyncTask =
+		function(taskFunction, startCbk, finishCbk) {
+	startCbk = startCbk || null;
+	finishCbk = finishCbk || null;
 	var task = new SimpleTaskManagerTask();
 	task.handle = this.generateTaskHandle();
 	task.sync = false;
 	task.taskFunction = taskFunction;
+	task.startCbk = startCbk;
+	task.finishCbk = finishCbk;
+	
 	this.taskQueue.push(task);
 	this.schedulerMain();
+	
 	return task.handle;
 };
 
@@ -47,14 +60,16 @@ SimpleTaskManager.prototype.enqueueAsyncTask = function(taskFunction) {
  * taskHandle - Handle of the finishing task
  */
 SimpleTaskManager.prototype.asyncTaskFinished = function(taskHandle) {
-	if(taskHandle != this.runningTaskHandle) {
+	if(taskHandle != this.runningTask.handle) {
 		throw new Error("Finishing task handle unknown.");
 	}
+	if(this.runningTask.finishCbk) {
+		this.runningTask.finishCbk(this.runningTask.handle);
+	}
 	this.taskRunning = false;
-	this.runningTaskHandle = null;
+	this.runningTask = null;
 	this.schedulerMain();
 };
-
 
 SimpleTaskManager.prototype.taskPush = function(task) {
 	this.taskQueue.push(task);
@@ -83,7 +98,10 @@ SimpleTaskManager.prototype.runNextTask = function() {
 	}
 	this.taskRunning = true;
 	var crntTask = this.taskPop();
-	this.runningTaskHandle = crntTask.handle;
+	this.runningTask = crntTask;
+	if(crntTask.startCbk) {
+		crntTask.startCbk(crntTask.handle);
+	}
 	crntTask.taskFunction(crntTask.handle);
 };
 
@@ -91,4 +109,6 @@ function SimpleTaskManagerTask() {
 	this.handle = null; // task handle
 	this.taskFunction = null; // function to run the task
 	this.sync = false; // synchronous taskFunction 
+	this.startCbk = null; // callback to be executed before task starts
+	this.finishCbk = null; // callback to be executed after task finished
 }
