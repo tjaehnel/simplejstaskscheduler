@@ -5,6 +5,7 @@ The aim of this small JavaScript class is to serialize asynchronious JavaScript 
 Simply enqueue your task and notify the system when it's finished.
 
 Example to run two timers sequentially:
+
     // prepare two tasks to run
     var runAfter3s = function(taskHandle) {
       window.setTimeout(function() {
