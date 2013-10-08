@@ -2,7 +2,7 @@ describe("Event", function() {
   var tm = null;
 
   beforeEach(function() {
-    tm = new SimpleTaskManager();
+    tm = new SimpleJsTaskScheduler();
   });
   
   it("should be fired on task start", function() {

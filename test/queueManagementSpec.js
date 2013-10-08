@@ -2,14 +2,14 @@ describe("Queue Management", function() {
   var tm = null;
 
   beforeEach(function() {
-    tm = new SimpleTaskManager();
+    tm = new SimpleJsTaskScheduler();
   });
   
   it("should enqueue tasks", function() {
-	var task1 = new SimpleTaskManagerTask();
+	var task1 = new SimpleJsTask();
 	task1.sync = true;
 	task1.handle = 12345;
-	var task2 = new SimpleTaskManagerTask();
+	var task2 = new SimpleJsTask();
 	task2.sync = false;
 	task2.handle = 4711;
 

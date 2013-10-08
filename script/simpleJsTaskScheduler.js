@@ -1,9 +1,9 @@
 /**
- * Class: SimpleTaskManager
+ * Class: SimpleJsTaskScheduler
  * provides an interface to manage and run asynchronous tasks.
  * 
  */
-function SimpleTaskManager() {
+function SimpleJsTaskScheduler() {
 	this.taskQueue = [];
 	this.prevTaskHandle = 0;
 	this.taskRunning = false;
@@ -34,11 +34,11 @@ function SimpleTaskManager() {
  * Return:
  * task handle
  */
-SimpleTaskManager.prototype.enqueueAsyncTask =
+SimpleJsTaskScheduler.prototype.enqueueAsyncTask =
 		function(taskFunction, startCbk, finishCbk) {
 	startCbk = startCbk || null;
 	finishCbk = finishCbk || null;
-	var task = new SimpleTaskManagerTask();
+	var task = new SimpleJsTask();
 	task.handle = this.generateTaskHandle();
 	task.sync = false;
 	task.taskFunction = taskFunction;
@@ -59,7 +59,7 @@ SimpleTaskManager.prototype.enqueueAsyncTask =
  * Parameters:
  * taskHandle - Handle of the finishing task
  */
-SimpleTaskManager.prototype.asyncTaskFinished = function(taskHandle) {
+SimpleJsTaskScheduler.prototype.asyncTaskFinished = function(taskHandle) {
 	if(taskHandle != this.runningTask.handle) {
 		throw new Error("Finishing task handle unknown.");
 	}
@@ -71,28 +71,28 @@ SimpleTaskManager.prototype.asyncTaskFinished = function(taskHandle) {
 	this.schedulerMain();
 };
 
-SimpleTaskManager.prototype.taskPush = function(task) {
+SimpleJsTaskScheduler.prototype.taskPush = function(task) {
 	this.taskQueue.push(task);
 };
 
-SimpleTaskManager.prototype.taskPop = function() {
+SimpleJsTaskScheduler.prototype.taskPop = function() {
 	return this.taskQueue.shift();
 };
 
-SimpleTaskManager.prototype.generateTaskHandle = function() {
+SimpleJsTaskScheduler.prototype.generateTaskHandle = function() {
 	this.prevTaskHandle++;
 	return this.prevTaskHandle;
 };
 
 
-SimpleTaskManager.prototype.schedulerMain = function() {
+SimpleJsTaskScheduler.prototype.schedulerMain = function() {
 	if (this.taskRunning == true) {
 		return;
 	}
 	this.runNextTask();
 };
 
-SimpleTaskManager.prototype.runNextTask = function() {
+SimpleJsTaskScheduler.prototype.runNextTask = function() {
 	if (this.taskQueue.length < 1) {
 		return;
 	}
@@ -105,7 +105,7 @@ SimpleTaskManager.prototype.runNextTask = function() {
 	crntTask.taskFunction(crntTask.handle);
 };
 
-function SimpleTaskManagerTask() {
+function SimpleJsTask() {
 	this.handle = null; // task handle
 	this.taskFunction = null; // function to run the task
 	this.sync = false; // synchronous taskFunction 
